@@ -1,0 +1,366 @@
+#######################################################################
+# Test for copying block of size 63;
+#######################################################################
+	.pos 0
+main:	irmovq Stack, %rsp  	# Set up stack pointer
+
+	# Set up arguments for copy function and then invoke it
+	irmovq $63, %rdx		# src and dst have 63 elements
+	irmovq dest, %rsi	# dst array
+	irmovq src, %rdi	# src array
+	call ncopy		 
+	halt			# should halt with num nonzeros in %rax
+StartFun:
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header
+
+
+	iaddq $-10,%rdx		# len < 10?
+	jl Root			# if so, goto Root:
+
+
+Loop1:	mrmovq (%rdi), %r10	# read val from src...
+	mrmovq 8(%rdi), %r11	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop2		# if so, goto Loop2:
+	iaddq $0x1, %rax		# count++
+Loop2:	mrmovq 16(%rdi), %r10	# read val from src...
+	rmmovq %r11, 8(%rsi)	# ...and store it to dst
+	andq %r11, %r11		# val <= 0?
+	jle Loop3		# if so, goto Loop3:
+	iaddq $0x1, %rax		# count++
+Loop3:	mrmovq 24(%rdi), %r11	# read val from src...
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop4		# if so, goto Loop4:
+	iaddq $0x1, %rax		# count++
+Loop4:	mrmovq 32(%rdi), %r10	# read val from src...
+	rmmovq %r11, 24(%rsi)	# ...and store it to dst
+	andq %r11, %r11		# val <= 0?
+	jle Loop5		# if so, goto Loop5:
+	iaddq $0x1, %rax		# count++
+Loop5:	mrmovq 40(%rdi), %r11	# read val from src...
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop6		# if so, goto Loop6:
+	iaddq $0x1, %rax		# count++
+Loop6:	mrmovq 48(%rdi), %r10	# read val from src...
+	rmmovq %r11, 40(%rsi)	# ...and store it to dst
+	andq %r11, %r11		# val <= 0?
+	jle Loop7		# if so, goto Loop7:
+	iaddq $0x1, %rax		# count++
+Loop7:	mrmovq 56(%rdi), %r11	# read val from src...
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop8		# if so, goto Loop8:
+	iaddq $0x1, %rax		# count++
+Loop8:	mrmovq 64(%rdi), %r10	# read val from src...
+	rmmovq %r11, 56(%rsi)	# ...and store it to dst
+	andq %r11, %r11		# val <= 0?
+	jle Loop9		# if so, goto Loop9:
+	iaddq $0x1, %rax		# count++
+Loop9:	mrmovq 72(%rdi), %r11	# read val from src...
+	rmmovq %r10, 64(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle Loop10		# if so, goto Loop10:
+	iaddq $0x1, %rax		# count++
+Loop10:	#mrmovq 64(%rdi), %r10	# read val from src...
+	rmmovq %r11, 72(%rsi)	# ...and store it to dst
+	andq %r11, %r11		# val <= 0?
+	jle Loop		# if so, goto Loop:
+	iaddq $0x1, %rax		# count++
+
+
+
+Loop:
+	iaddq $0x50, %rdi	# src++
+	iaddq $0x50, %rsi	# dst++
+	iaddq $-10,%rdx		# len >= 10?
+	jge Loop1		# if so, goto Loop1:
+Root:
+	iaddq	$7,%rdx		# len <= 3
+	jl	Left
+	jg	Right	
+	je	Remain3		# len == 3 Middle
+	
+
+Left:
+	iaddq	$2,%rdx		# len == 1
+	je	Remain1
+	iaddq	$-1,%rdx	# len == 2
+	je	Remain2
+	ret			# len == 0 
+Right:
+	iaddq	$-3,%rdx	# len <= 6 
+	jg	RightRight
+	je	Remain6		# len == 6
+	iaddq	$1,%rdx		# RightLeft
+	je	Remain5		# len == 5
+	jmp	Remain4		# len == 4
+	
+RightRight:
+	iaddq	$-2,%rdx
+	jl	Remain7
+	je	Remain8
+
+Remain9:
+	mrmovq 64(%rdi), %r11	# read val from src...
+	rmmovq %r11, 64(%rsi)
+	andq %r11, %r11		# val <= 0?
+
+Remain8:
+	mrmovq 56(%rdi), %r11	# read val from src...
+	jle Remain82		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+
+Remain82:
+	
+	rmmovq %r11, 56(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain7:
+	mrmovq 48(%rdi), %r11	# read val from src...
+	jle Remain72		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain72:
+		
+	rmmovq %r11, 48(%rsi)
+	andq %r11, %r11		# val <= 0?
+
+Remain6:
+	mrmovq 40(%rdi), %r11	# read val from src...
+	jle Remain62		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain62:
+		
+	rmmovq %r11, 40(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain5:
+	mrmovq 32(%rdi), %r11	# read val from src...
+	jle Remain52		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain52:
+		
+	rmmovq %r11, 32(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain4:
+	mrmovq 24(%rdi), %r11	# read val from src...
+	jle Remain42	# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain42:
+
+	rmmovq %r11, 24(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain3:
+	mrmovq 16(%rdi), %r11	# read val from src...
+	jle Remain32		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain32:
+
+	rmmovq %r11, 16(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain2:
+	mrmovq 8(%rdi), %r11	# read val from src...
+	jle Remain22		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain22:
+
+	rmmovq %r11, 8(%rsi)
+	andq %r11, %r11		# val <= 0?
+Remain1:
+	mrmovq (%rdi), %r11	# read val from src...
+	jle Remain12		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+Remain12:
+	
+	rmmovq %r11, (%rsi)
+	andq %r11, %r11		# val <= 0?
+	jle Done		# if so, goto Npos:
+	iaddq $0x1, %rax		# count++
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */
+EndFun:
+
+###############################
+# Source and destination blocks 
+###############################
+	.align 8
+src:
+	.quad -1
+	.quad 2
+	.quad 3
+	.quad -4
+	.quad -5
+	.quad 6
+	.quad -7
+	.quad 8
+	.quad -9
+	.quad -10
+	.quad 11
+	.quad -12
+	.quad 13
+	.quad -14
+	.quad -15
+	.quad -16
+	.quad -17
+	.quad 18
+	.quad -19
+	.quad 20
+	.quad -21
+	.quad 22
+	.quad 23
+	.quad -24
+	.quad -25
+	.quad 26
+	.quad 27
+	.quad 28
+	.quad -29
+	.quad 30
+	.quad -31
+	.quad 32
+	.quad 33
+	.quad 34
+	.quad -35
+	.quad -36
+	.quad -37
+	.quad 38
+	.quad -39
+	.quad 40
+	.quad -41
+	.quad 42
+	.quad -43
+	.quad -44
+	.quad -45
+	.quad 46
+	.quad -47
+	.quad -48
+	.quad -49
+	.quad -50
+	.quad -51
+	.quad -52
+	.quad 53
+	.quad -54
+	.quad 55
+	.quad 56
+	.quad 57
+	.quad 58
+	.quad 59
+	.quad 60
+	.quad 61
+	.quad 62
+	.quad 63
+	.quad 0xbcdefa # This shouldn't get moved
+
+	.align 16
+Predest:
+	.quad 0xbcdefa
+dest:
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+Postdest:
+	.quad 0xdefabc
+
+.align 8
+# Run time stack
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+
+Stack:
